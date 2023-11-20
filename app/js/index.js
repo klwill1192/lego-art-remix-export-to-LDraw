@@ -64,6 +64,7 @@ const interactionSelectors = [
     "download-depth-instructions-button",
     "high-quality-depth-instructions-check",
     "export-depth-to-bricklink-button",
+    "export-to-ldraw-button",
 ].map((id) => document.getElementById(id));
 
 const customStudTableBody = document.getElementById("custom-stud-table-body");
@@ -204,6 +205,8 @@ function enableDepth() {
     document.getElementById("download-instructions-button").innerHTML = "Generate Color Instructions PDF";
 
     document.getElementById("export-to-bricklink-button").innerHTML = "Copy Pixels Bricklink XML to Clipboard";
+
+    document.getElementById("export-to-ldraw-button").innerHTML = "Copy LDraw File to Clipboard";
 
     onDepthMapCountChange();
 
@@ -2401,16 +2404,18 @@ async function generateInstructions() {
     runStep4(async () => {
         const isHighQuality = document.getElementById("high-quality-instructions-check").checked;
         const step4PixelArray = getPixelArrayFromCanvas(step4Canvas);
+		
         const resultImage = isBleedthroughEnabled()
             ? revertDarkenedImage(
                   step4PixelArray,
                   getDarkenedStudsToStuds(ALL_BRICKLINK_SOLID_COLORS.map((color) => color.hex))
               )
             : step4PixelArray;
-
+			
         const titlePageCanvas = document.createElement("canvas");
         instructionsCanvasContainer.appendChild(titlePageCanvas);
         const studMap = getUsedPixelsStudMap(resultImage);
+		
         const filteredAvailableStudHexList = selectedSortedStuds
             .filter((pixelHex) => (studMap[pixelHex] || 0) > 0)
             .filter(function (item, pos, self) {
@@ -2440,7 +2445,7 @@ async function generateInstructions() {
         const pdfHeight = pdf.internal.pageSize.getHeight();
 
         const totalPlates = resultImage.length / (4 * PLATE_WIDTH * PLATE_WIDTH);
-
+		
         document.getElementById("pdf-progress-bar").style.width = `${100 / (totalPlates + 1)}%`;
 
         document.getElementById("pdf-progress-bar").style.width = "0%";
@@ -2471,7 +2476,7 @@ async function generateInstructions() {
             instructionsCanvasContainer.appendChild(instructionPageCanvas);
 
             const subPixelArray = getSubPixelArray(resultImage, i, targetResolution[0], PLATE_WIDTH);
-
+			
             const row = Math.floor((i * PLATE_WIDTH) / targetResolution[0]);
             const col = i % (targetResolution[0] / PLATE_WIDTH);
 
@@ -2693,6 +2698,7 @@ document.getElementById("download-depth-instructions-button").addEventListener("
 
 document.getElementById("export-to-bricklink-button").addEventListener("click", () => {
     disableInteraction();
+
     navigator.clipboard
         .writeText(
             ("" + selectedPixelPartNumber).match("^variable.*$")
@@ -2714,6 +2720,76 @@ document.getElementById("export-to-bricklink-button").addEventListener("click", 
                 console.error("Async: Could not copy text: ", err);
             }
         );
+});
+
+document.getElementById("export-to-ldraw-button").addEventListener("click", () => {
+
+    disableInteraction();
+
+	const LDrawPixelArray = getPixelArrayFromCanvas(bricklinkCacheCanvas);
+    const totalPlates = LDrawPixelArray.length / (4 * PLATE_WIDTH * PLATE_WIDTH);
+	const pieceHeight = (selectedPixelPartNumber == 3005) ? -24 : -8;
+
+	let ldrfile = [];
+	var ldrix = 0;
+	ldrfile[ldrix++] = `0 FILE main.ldr`;
+	ldrfile[ldrix++] = `0 Name: Main`;
+	ldrfile[ldrix++] = `0 Author: LEGO-Art-Remix`;
+
+    for (var i = 0; i < targetResolution[1]/PLATE_WIDTH; i++) {
+		ldrfile[ldrix++] = `1 0 0 0 ${-20*PLATE_WIDTH*i} 1 0 0 0 1 0 0 0 1 Row-${i+1}.ldr`;
+	}
+	ldrfile[ldrix++] = `0 NOFILE`;
+
+	var panelNumber = 1;
+    for (var i = 0; i < targetResolution[1]/PLATE_WIDTH; i++) {
+		ldrfile[ldrix++] = `0 FILE Row-${i+1}.ldr`;
+		ldrfile[ldrix++] = `0 Name: Main`;
+		ldrfile[ldrix++] = `0 Author: LEGO-Art-Remix`;
+		for (var j = 0; j < targetResolution[0]/PLATE_WIDTH; j++) {
+			ldrfile[ldrix++] = `1 0 ${j*20*PLATE_WIDTH} 0 0 1 0 0 0 1 0 0 0 1 Panel-${panelNumber}.ldr`;
+			panelNumber++;
+		}
+		ldrfile[ldrix++] = `0 NOFILE`;
+	}
+
+    for (var i = 0; i < totalPlates; i++) {
+
+		ldrfile[ldrix++] = `0 FILE Panel-${i+1}.ldr`;
+		ldrfile[ldrix++] = `0 Author: LEGO-Art-Remix`;
+		ldrfile[ldrix++] = `1 0 0 0 0 1 0 0 0 1 0 0 0 1 65803.dat`;
+		if ((i+1) % (targetResolution[0]/PLATE_WIDTH) != 0) {
+			ldrfile[ldrix++] = `1 0 160 18 100 -1 0 0 0 1 0 0 0 -1 2780.dat`;
+			ldrfile[ldrix++] = `1 0 160 18 0 -1 0 0 0 1 0 0 0 -1 2780.dat`;
+			ldrfile[ldrix++] = `1 0 160 18 -100 -1 0 0 0 1 0 0 0 -1 2780.dat`;
+		}
+		if (Math.floor(i/(targetResolution[0]/PLATE_WIDTH)) < (targetResolution[1]/PLATE_WIDTH)-1) {
+			ldrfile[ldrix++] = `1 0 100 18 -160 0 0 1 0 1 0 -1 0 0 2780.dat`;
+			ldrfile[ldrix++] = `1 0 0 18 -160 0 0 1 0 1 0 -1 0 0 2780.dat`;
+			ldrfile[ldrix++] = `1 0 -100 18 -160 0 0 1 0 1 0 -1 0 0 2780.dat`;
+		}
+		
+        const subPixelArray = getSubPixelArray(LDrawPixelArray, i, targetResolution[0], PLATE_WIDTH);
+		
+		for (var j = 0; j <  subPixelArray.length / 4; j++) {
+			const x = Math.floor(j / PLATE_WIDTH);
+			const z = j % PLATE_WIDTH;
+			ldrfile[ldrix++] = `1 ${HEX_TO_LDID[rgbToHex(subPixelArray[4*j],subPixelArray[4*j+1],subPixelArray[4*j+2])]} ${20*z-150} ${pieceHeight} ${150-20*x} 1 0 0 0 1 0 0 0 1 ${selectedPixelPartNumber}.dat`;
+		}
+
+		ldrfile[ldrix++] = `0 NOFILE`;
+	}
+		
+	navigator.clipboard.writeText(`${ldrfile.join("\n")}`)
+		.then(
+			function () {
+				enableInteraction();
+			},
+			function (err) {
+				console.error("Async: Could not copy text: ", err);
+			}
+		);
+
 });
 
 document.getElementById("export-depth-to-bricklink-button").addEventListener("click", () => {

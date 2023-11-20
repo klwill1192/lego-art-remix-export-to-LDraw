@@ -156,6 +156,7 @@ function getArrayWithOverridesApplied(inputPixels, overridePixels) {
 }
 
 function getUsedPixelsStudMap(inputPixels) {
+	
     let result = {};
     for (let i = 0; i < inputPixels.length / 4; i++) {
         const targetPixelIndex = i * 4;
@@ -166,6 +167,7 @@ function getUsedPixelsStudMap(inputPixels) {
         );
         result[pixelHexVal] = (result[pixelHexVal] || 0) + 1;
     }
+
     return result;
 }
 
@@ -1772,6 +1774,7 @@ function getDepthWantedListXML(depthPartsMap) {
 }
 
 function getWantedListXML(studMap, partID) {
+	
     const items = Object.keys(studMap).map(
         (stud) =>
             `<ITEM>
@@ -1781,6 +1784,7 @@ function getWantedListXML(studMap, partID) {
       <MINQTY>${studMap[stud]}</MINQTY>
     </ITEM>`
     );
+
     return `<?xml version="1.0" encoding="UTF-8"?>
   <INVENTORY>
     \n${items.join("\n")}\n
