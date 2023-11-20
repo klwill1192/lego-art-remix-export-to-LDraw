@@ -1672,7 +1672,7 @@
                   </div>
                 </div>
 
-                <div class="card accordion-card">
+                <div class="card accordion-card" id="bricklink-export-card">
                   <div class="card-header" id="step-4-3-heading">
                     <h5 class="mb-0">
                       <button
@@ -1682,7 +1682,7 @@
                         aria-expanded="false"
                         aria-controls="step-4-3-collapse"
                       >
-                        Instructions
+                        Export LDraw File
                       </button>
                     </h5>
                   </div>
@@ -1690,6 +1690,51 @@
                     id="step-4-3-collapse"
                     class="collapse"
                     aria-labelledby="step-4-3-heading"
+                    data-parent="#step-4-accordion"
+                  >
+                    <div class="card-body accordion-card-body">
+                      <button
+                        type="button"
+                        id="export-to-ldraw-button"
+                        class="btn btn-info"
+                        style="margin-bottom: 10px; margin-top: 8px"
+                      >
+                        Copy LDraw File to Clipboard
+                      </button>
+                      <br />
+                      <small>
+                        <p style="margin-left: 4px; margin-bottom: 4px">
+                          The type of piece used depends on 'Pixel Piece' under step 3
+                        </p>
+                        <p style="margin-left: 4px; margin-bottom: 4px">Frame elements and connecting pins are included</p>
+                        <p style="margin-left: 4px; margin-bottom: 4px">
+                          <a href="https://www.ldraw.org/" target="_blank">
+                            LDraw Home Page
+                          </a>
+                        </p>
+                      </small>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="card accordion-card">
+                  <div class="card-header" id="step-4-4-heading">
+                    <h5 class="mb-0">
+                      <button
+                        class="btn btn-link collapsed"
+                        data-toggle="collapse"
+                        data-target="#step-4-4-collapse"
+                        aria-expanded="false"
+                        aria-controls="step-4-4-collapse"
+                      >
+                        Instructions
+                      </button>
+                    </h5>
+                  </div>
+                  <div
+                    id="step-4-4-collapse"
+                    class="collapse"
+                    aria-labelledby="step-4-4-heading"
                     data-parent="#step-4-accordion"
                   >
                     <div class="card-body accordion-card-body">
