@@ -65,7 +65,7 @@ const interactionSelectors = [
     "high-quality-depth-instructions-check",
     "export-depth-to-bricklink-button",
     "export-to-ldraw-button",
-    "export-to-ldraw-button",
+    "include-frame-components-check",
 ].map((id) => document.getElementById(id));
 
 const customStudTableBody = document.getElementById("custom-stud-table-body");
