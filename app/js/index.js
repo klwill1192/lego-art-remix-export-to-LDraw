@@ -65,6 +65,7 @@ const interactionSelectors = [
     "high-quality-depth-instructions-check",
     "export-depth-to-bricklink-button",
     "export-to-ldraw-button",
+    "export-to-ldraw-button",
 ].map((id) => document.getElementById(id));
 
 const customStudTableBody = document.getElementById("custom-stud-table-body");
@@ -500,7 +501,7 @@ PIXEL_TYPE_OPTIONS.forEach((part) => {
         selectedPixelPartNumber = part.number;
         const isVariable = ("" + selectedPixelPartNumber).match("^variable.*$");
         document.getElementById("pixel-dimensions-container-wrapper").hidden = !isVariable;
-
+		document.getElementById("ldraw-export-card").hidden = isVariable;	// LDraw export not currently supported for variable pieces
         if (isVariable) {
             const availableParts = [...document.getElementById("pixel-dimensions-container").children].forEach(
                 (input) => {
@@ -2729,6 +2730,9 @@ document.getElementById("export-to-ldraw-button").addEventListener("click", () =
 	const LDrawPixelArray = getPixelArrayFromCanvas(bricklinkCacheCanvas);
     const totalPlates = LDrawPixelArray.length / (4 * PLATE_WIDTH * PLATE_WIDTH);
 	const pieceHeight = (selectedPixelPartNumber == 3005) ? -24 : -8;
+	const PLATE_COLS = targetResolution[0] / PLATE_WIDTH;
+	const PLATE_ROWS = targetResolution[1] / PLATE_WIDTH;
+	const includeFrame = document.getElementById("include-frame-components-check").checked;
 
 	let ldrfile = [];
 	var ldrix = 0;
@@ -2736,20 +2740,148 @@ document.getElementById("export-to-ldraw-button").addEventListener("click", () =
 	ldrfile[ldrix++] = `0 Name: Main`;
 	ldrfile[ldrix++] = `0 Author: LEGO-Art-Remix`;
 
-    for (var i = 0; i < targetResolution[1]/PLATE_WIDTH; i++) {
-		ldrfile[ldrix++] = `1 0 0 0 ${-20*PLATE_WIDTH*i} 1 0 0 0 1 0 0 0 1 Row-${i+1}.ldr`;
+
+    for (var i = 0; i < PLATE_COLS; i++) {
+		ldrfile[ldrix++] = `1 0 ${20*PLATE_WIDTH*i} 0 0 1 0 0 0 1 0 0 0 1 Column-${i+1}.ldr`;
 	}
+
+	if (includeFrame) {
+		//	1x2 brick with pin
+		for (var i = 0; i < PLATE_ROWS; i++) {
+			ldrfile[ldrix++] = `1 0 -170 8 ${100-20*PLATE_WIDTH*i} 0 0 -1 0 1 0 1 0 0 2458.dat`;
+			ldrfile[ldrix++] = `1 0 -170 8 ${-100-20*PLATE_WIDTH*i} 0 0 -1 0 1 0 1 0 0 2458.dat`;
+			ldrfile[ldrix++] = `1 0 ${-150+20*targetResolution[0]} 8 ${100-20*PLATE_WIDTH*i} 0 0 1 0 1 0 -1 0 0 2458.dat`;
+			ldrfile[ldrix++] = `1 0 ${-150+20*targetResolution[0]} 8 ${-100-20*PLATE_WIDTH*i} 0 0 1 0 1 0 -1 0 0 2458.dat`;
+		}
+
+		for (var i = 0; i < PLATE_COLS; i++) {
+			ldrfile[ldrix++] = `1 0 ${-100+20*PLATE_WIDTH*i} 8 170 1 0 0 0 1 0 0 0 1 2458.dat`;
+			ldrfile[ldrix++] = `1 0 ${100+20*PLATE_WIDTH*i} 8 170 1 0 0 0 1 0 0 0 1 2458.dat`;
+			ldrfile[ldrix++] = `1 0 ${-100+20*PLATE_WIDTH*i} 8 ${150-20*targetResolution[1]} -1 0 0 0 1 0 0 0 -1 2458.dat`;
+			ldrfile[ldrix++] = `1 0 ${100+20*PLATE_WIDTH*i} 8 ${150-20*targetResolution[1]} -1 0 0 0 1 0 0 0 -1 2458.dat`;
+		}
+
+	//	2x6 plates
+		ldrfile[ldrix++] = `1 0 -160 32 60 0 0 1 0 1 0 -1 0 0 3795.dat`;
+		ldrfile[ldrix++] = `1 0 -160 32 ${260-20*targetResolution[1]} 0 0 1 0 1 0 -1 0 0 3795.dat`;
+		ldrfile[ldrix++] = `1 0 ${-160+20*targetResolution[0]} 32 60 0 0 1 0 1 0 -1 0 0 3795.dat`;
+		ldrfile[ldrix++] = `1 0 ${-160+20*targetResolution[0]} 32 ${260-20*targetResolution[1]} 0 0 1 0 1 0 -1 0 0 3795.dat`;
+		
+		
+		ldrfile[ldrix++] = `1 0 -60 32 160 -1 0 0 0 1 0 0 0 -1 3795.dat`;
+		ldrfile[ldrix++] = `1 0 -60 32 ${160-20*targetResolution[1]} -1 0 0 0 1 0 0 0 -1 3795.dat`;
+		ldrfile[ldrix++] = `1 0 ${-260+20*targetResolution[0]} 32 160 -1 0 0 0 1 0 0 0 -1 3795.dat`;
+		ldrfile[ldrix++] = `1 0 ${-260+20*targetResolution[0]} 32 ${160-20*targetResolution[1]} -1 0 0 0 1 0 0 0 -1 3795.dat`;
+
+	//	2x16 plates
+		for (var i = 0; i < PLATE_ROWS-1; i++) {
+			ldrfile[ldrix++] = `1 0 -160 32 ${-160-20*PLATE_WIDTH*i} 0 0 1 0 1 0 -1 0 0 4282.dat`;
+			ldrfile[ldrix++] = `1 0 ${-160+20*PLATE_WIDTH*PLATE_COLS} 32 ${-160-20*PLATE_WIDTH*i} 0 0 1 0 1 0 -1 0 0 4282.dat`;
+		}
+
+		for (var i = 0; i < PLATE_COLS-1; i++) {
+			ldrfile[ldrix++] = `1 0 ${160+20*PLATE_WIDTH*i} 32 160 -1 0 0 0 1 0 0 0 -1 4282.dat`;
+			ldrfile[ldrix++] = `1 0 ${160+20*PLATE_WIDTH*i} 32 ${160-20*PLATE_WIDTH*PLATE_ROWS} -1 0 0 0 1 0 0 0 -1 4282.dat`;
+		}
+
+	//	Frame corners
+		ldrfile[ldrix++] = `1 0 -150 32 150 1 0 0 0 1 0 0 0 1 Frame-corner.ldr`;
+		ldrfile[ldrix++] = `1 0 ${-170+20*PLATE_WIDTH*PLATE_COLS} 32 150 0 0 1 0 1 0 -1 0 0 Frame-corner.ldr`;
+		ldrfile[ldrix++] = `1 0 -150 32 ${170-20*PLATE_WIDTH*PLATE_ROWS} 0 0 -1 0 1 0 1 0 0 Frame-corner.ldr`;
+		ldrfile[ldrix++] = `1 0 ${-170+20*PLATE_WIDTH*PLATE_COLS} 32 ${170-20*PLATE_WIDTH*PLATE_ROWS} -1 0 0 0 1 0 0 0 -1 Frame-corner.ldr`;
+
+	//	1x4 bricks
+		for (var i = 0; i < PLATE_COLS-1; i++) {
+			ldrfile[ldrix++] = `1 0 ${160+20*PLATE_WIDTH*i} 8 170 1 0 0 0 1 0 0 0 1 3010.dat`;
+			ldrfile[ldrix++] = `1 0 ${160+20*PLATE_WIDTH*i} 8 ${150-20*PLATE_WIDTH*PLATE_ROWS} 1 0 0 0 1 0 0 0 1 3010.dat`;
+		}
+
+		for (var i = 0; i < PLATE_ROWS-1; i++) {
+			ldrfile[ldrix++] = `1 0 -170 8 ${-160-20*PLATE_WIDTH*i} 0 0 -1 0 1 0 1 0 0 3010.dat`;
+			ldrfile[ldrix++] = `1 0 ${-150+20*PLATE_WIDTH*PLATE_COLS} 8 ${-160-20*PLATE_WIDTH*i} 0 0 -1 0 1 0 1 0 0 3010.dat`;
+		}
+
+	//	1x8 bricks
+		for (var i = 0; i < PLATE_ROWS; i++) {
+			ldrfile[ldrix++] = `1 0 -170 8 ${-20*PLATE_WIDTH*i} 0 0 -1 0 1 0 1 0 0 3008.dat`;
+			ldrfile[ldrix++] = `1 0 ${-150+20*PLATE_WIDTH*PLATE_COLS} 8 ${-20*PLATE_WIDTH*i} 0 0 -1 0 1 0 1 0 0 3008.dat`;
+		}
+		
+		for (var i = 0; i < PLATE_COLS; i++) {
+			ldrfile[ldrix++] = `1 0 ${20*PLATE_WIDTH*i} 8 170 1 0 0 0 1 0 0 0 1 3008.dat`;
+			ldrfile[ldrix++] = `1 0 ${20*PLATE_WIDTH*i} 8 ${150-20*PLATE_WIDTH*PLATE_ROWS} 1 0 0 0 1 0 0 0 1 3008.dat`;
+		}
+
+	//	1x1 bricks
+		ldrfile[ldrix++] = `1 0 -170 -16 170 1 0 0 0 1 0 0 0 1 3005.dat`;
+		ldrfile[ldrix++] = `1 0 ${-150+20*PLATE_WIDTH*PLATE_COLS} -16 170 1 0 0 0 1 0 0 0 1 3005.dat`;
+		ldrfile[ldrix++] = `1 0 -170 -16 ${150-20*PLATE_WIDTH*PLATE_ROWS} 1 0 0 0 1 0 0 0 1 3005.dat`;
+		ldrfile[ldrix++] = `1 0 ${-150+20*PLATE_WIDTH*PLATE_COLS} -16 ${150-20*PLATE_WIDTH*PLATE_ROWS} 1 0 0 0 1 0 0 0 1 3005.dat`;
+
+	//	1x8 bricks
+		ldrfile[ldrix++] = `1 0 -170 -16 80 0 0 -1 0 1 0 1 0 0 3008.dat`;
+		ldrfile[ldrix++] = `1 0 ${-150+20*PLATE_WIDTH*PLATE_COLS} -16 80 0 0 -1 0 1 0 1 0 0 3008.dat`;
+		ldrfile[ldrix++] = `1 0 -170 -16 ${240-20*PLATE_WIDTH*PLATE_ROWS} 0 0 -1 0 1 0 1 0 0 3008.dat`;
+		ldrfile[ldrix++] = `1 0 ${-150+20*PLATE_WIDTH*PLATE_COLS} -16 ${240-20*PLATE_WIDTH*PLATE_ROWS} 0 0 -1 0 1 0 1 0 0 3008.dat`;
+		ldrfile[ldrix++] = `1 0 -80 -16 170 1 0 0 0 1 0 0 0 1 3008.dat`;
+		ldrfile[ldrix++] = `1 0 -80 -16 ${150-20*PLATE_WIDTH*PLATE_ROWS} 1 0 0 0 1 0 0 0 1 3008.dat`;
+		ldrfile[ldrix++] = `1 0 ${-240+20*PLATE_WIDTH*PLATE_COLS} -16 170 1 0 0 0 1 0 0 0 1 3008.dat`;
+		ldrfile[ldrix++] = `1 0 ${-240+20*PLATE_WIDTH*PLATE_COLS} -16 ${150-20*PLATE_WIDTH*PLATE_ROWS} 1 0 0 0 1 0 0 0 1 3008.dat`;
+		
+	//	1x16 bricks
+		for (var i = 0; i < PLATE_ROWS-1; i++) {
+			ldrfile[ldrix++] = `1 0 -170 -16 ${-160-20*PLATE_WIDTH*i} 0 0 -1 0 1 0 1 0 0 2465.dat`;
+			ldrfile[ldrix++] = `1 0 ${-150+20*PLATE_WIDTH*PLATE_COLS} -16 ${-160-20*PLATE_WIDTH*i} 0 0 -1 0 1 0 1 0 0 2465.dat`;
+		}
+		
+		for (var i = 0; i < PLATE_COLS-1; i++) {
+			ldrfile[ldrix++] = `1 0 ${160+20*PLATE_WIDTH*i} -16 170 1 0 0 0 1 0 0 0 1 2465.dat`;
+			ldrfile[ldrix++] = `1 0 ${160+20*PLATE_WIDTH*i} -16 ${150-20*PLATE_WIDTH*PLATE_ROWS} 1 0 0 0 1 0 0 0 1 2465.dat`;
+		}
+		
+	//	2x2 corner tiles
+		ldrfile[ldrix++] = `1 0 -170 -24 170 0 0 1 0 1 0 -1 0 0 14719.dat`;
+		ldrfile[ldrix++] = `1 0 ${-150+20*PLATE_WIDTH*PLATE_COLS} -24 170 -1 0 0 0 1 0 0 0 -1 14719.dat`;
+		ldrfile[ldrix++] = `1 0 -170 -24 ${150-20*PLATE_WIDTH*PLATE_ROWS} 1 0 0 0 1 0 0 0 1 14719.dat`;
+		ldrfile[ldrix++] = `1 0 ${-150+20*PLATE_WIDTH*PLATE_COLS} -24 ${150-20*PLATE_WIDTH*PLATE_ROWS} 0 0 -1 0 1 0 1 0 0 14719.dat`;
+
+	//	1x3 tiles
+		ldrfile[ldrix++] = `1 0 -170 -24 110 0 0 -1 0 1 0 1 0 0 63864.dat`;
+		ldrfile[ldrix++] = `1 0 ${-150+20*PLATE_WIDTH*PLATE_COLS} -24 110 0 0 -1 0 1 0 1 0 0 63864.dat`;
+		ldrfile[ldrix++] = `1 0 -170 -24 ${210-20*PLATE_WIDTH*PLATE_ROWS} 0 0 -1 0 1 0 1 0 0 63864.dat`;
+		ldrfile[ldrix++] = `1 0 ${-150+20*PLATE_WIDTH*PLATE_COLS} -24 ${210-20*PLATE_WIDTH*PLATE_ROWS} 0 0 -1 0 1 0 1 0 0 63864.dat`;
+		
+		ldrfile[ldrix++] = `1 0 -110 -24 170 1 0 0 0 1 0 0 0 1 63864.dat`;
+		ldrfile[ldrix++] = `1 0 -110 -24 ${150-20*PLATE_WIDTH*PLATE_ROWS} 1 0 0 0 1 0 0 0 1 63864.dat`;
+		ldrfile[ldrix++] = `1 0 ${-210+20*PLATE_WIDTH*PLATE_COLS} -24 170 1 0 0 0 1 0 0 0 1 63864.dat`;
+		ldrfile[ldrix++] = `1 0 ${-210+20*PLATE_WIDTH*PLATE_COLS} -24 ${150-20*PLATE_WIDTH*PLATE_ROWS} 1 0 0 0 1 0 0 0 1 63864.dat`;
+
+	//	1x8 tiles
+		for (var i = 0; i < 2*PLATE_ROWS-1; i++) {
+			ldrfile[ldrix++] = `1 0 -170 -24 ${-160*i} 0 0 -1 0 1 0 1 0 0 4162.dat`;
+			ldrfile[ldrix++] = `1 0 ${-150+20*PLATE_WIDTH*PLATE_COLS} -24 ${-160*i} 0 0 -1 0 1 0 1 0 0 4162.dat`;
+		}
+			
+		for (var i = 0; i < 2*PLATE_COLS-1; i++) {
+			ldrfile[ldrix++] = `1 0 ${160*i} -24 170 1 0 0 0 1 0 0 0 1 4162.dat`;
+			ldrfile[ldrix++] = `1 0 ${160*i} -24 ${150-20*PLATE_WIDTH*PLATE_ROWS} 1 0 0 0 1 0 0 0 1 4162.dat`;
+		}
+	}
+	
 	ldrfile[ldrix++] = `0 NOFILE`;
 
-	var panelNumber = 1;
-    for (var i = 0; i < targetResolution[1]/PLATE_WIDTH; i++) {
-		ldrfile[ldrix++] = `0 FILE Row-${i+1}.ldr`;
-		ldrfile[ldrix++] = `0 Name: Main`;
+    for (var i = 0; i < PLATE_COLS; i++) {
+		ldrfile[ldrix++] = `0 FILE Column-${i+1}.ldr`;
 		ldrfile[ldrix++] = `0 Author: LEGO-Art-Remix`;
-		for (var j = 0; j < targetResolution[0]/PLATE_WIDTH; j++) {
-			ldrfile[ldrix++] = `1 0 ${j*20*PLATE_WIDTH} 0 0 1 0 0 0 1 0 0 0 1 Panel-${panelNumber}.ldr`;
-			panelNumber++;
+		for (var j = 0; j < PLATE_ROWS; j++) {
+			ldrfile[ldrix++] = `1 0 0 0 ${-j*20*PLATE_WIDTH} 1 0 0 0 1 0 0 0 1 Panel-${j*PLATE_COLS+i+1}.ldr`;
 		}
+
+//	2x6 plates
+		for (var j = 0; j < PLATE_ROWS-1; j++) {
+			ldrfile[ldrix++] = `1 0 0 32 ${-160-20*PLATE_WIDTH*j} 1 0 0 0 1 0 0 0 1 3795.dat`;
+		}
+		
 		ldrfile[ldrix++] = `0 NOFILE`;
 	}
 
@@ -2758,12 +2890,12 @@ document.getElementById("export-to-ldraw-button").addEventListener("click", () =
 		ldrfile[ldrix++] = `0 FILE Panel-${i+1}.ldr`;
 		ldrfile[ldrix++] = `0 Author: LEGO-Art-Remix`;
 		ldrfile[ldrix++] = `1 0 0 0 0 1 0 0 0 1 0 0 0 1 65803.dat`;
-		if ((i+1) % (targetResolution[0]/PLATE_WIDTH) != 0) {
+		if ((i+1) % (PLATE_COLS) != 0) {
 			ldrfile[ldrix++] = `1 0 160 18 100 -1 0 0 0 1 0 0 0 -1 2780.dat`;
 			ldrfile[ldrix++] = `1 0 160 18 0 -1 0 0 0 1 0 0 0 -1 2780.dat`;
 			ldrfile[ldrix++] = `1 0 160 18 -100 -1 0 0 0 1 0 0 0 -1 2780.dat`;
 		}
-		if (Math.floor(i/(targetResolution[0]/PLATE_WIDTH)) < (targetResolution[1]/PLATE_WIDTH)-1) {
+		if (Math.floor(i/PLATE_COLS) < PLATE_ROWS-1) {
 			ldrfile[ldrix++] = `1 0 100 18 -160 0 0 1 0 1 0 -1 0 0 2780.dat`;
 			ldrfile[ldrix++] = `1 0 0 18 -160 0 0 1 0 1 0 -1 0 0 2780.dat`;
 			ldrfile[ldrix++] = `1 0 -100 18 -160 0 0 1 0 1 0 -1 0 0 2780.dat`;
@@ -2779,6 +2911,15 @@ document.getElementById("export-to-ldraw-button").addEventListener("click", () =
 
 		ldrfile[ldrix++] = `0 NOFILE`;
 	}
+		
+		ldrfile[ldrix++] = `0 FILE Frame-corner.ldr`;
+		ldrfile[ldrix++] = `0 Author: LEGO-Art-Remix`;
+		ldrfile[ldrix++] = `1 0 0 0 0 1 0 0 0 1 0 0 0 1 11212.dat`;
+		ldrfile[ldrix++] = `1 0 -20 -24 20 0 0 1 0 1 0 -1 0 0 2357.dat`;
+		ldrfile[ldrix++] = `1 0 -20 -24 -20 0 0 1 0 1 0 -1 0 0 3005.dat`;
+		ldrfile[ldrix++] = `1 0 20 -24 20 0 0 1 0 1 0 -1 0 0 3005.dat`;
+		ldrfile[ldrix++] = `0 NOFILE`;
+		
 		
 	navigator.clipboard.writeText(`${ldrfile.join("\n")}`)
 		.then(
