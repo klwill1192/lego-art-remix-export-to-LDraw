@@ -1672,7 +1672,7 @@
                   </div>
                 </div>
 
-                <div class="card accordion-card" id="bricklink-export-card">
+                <div class="card accordion-card" id="ldraw-export-card">
                   <div class="card-header" id="step-4-3-heading">
                     <h5 class="mb-0">
                       <button
@@ -1688,7 +1688,7 @@
                   </div>
                   <div
                     id="step-4-3-collapse"
-                    class="collapse"
+                    class="collapse" 
                     aria-labelledby="step-4-3-heading"
                     data-parent="#step-4-accordion"
                   >
@@ -1702,11 +1702,22 @@
                         Copy LDraw File to Clipboard
                       </button>
                       <br />
+                      <div class="checkbox" style="margin-top: 4px; margin-left: 4px">
+                        <label class="checkbox-clickable">
+                          <input
+                            type="checkbox"
+                            class="checkbox-clickable"
+                            id="include-frame-components-check"
+							checked=true
+                          />
+                          <span style="font-size: 13px">Include frame components</span>
+                        </label>
+                      </div>
                       <small>
                         <p style="margin-left: 4px; margin-bottom: 4px">
                           The type of piece used depends on 'Pixel Piece' under step 3
                         </p>
-                        <p style="margin-left: 4px; margin-bottom: 4px">Frame elements and connecting pins are included</p>
+                        <p style="margin-left: 4px; margin-bottom: 4px">Base bricks, connecting pins, and connecting plates are included.</p>
                         <p style="margin-left: 4px; margin-bottom: 4px">
                           <a href="https://www.ldraw.org/" target="_blank">
                             LDraw Home Page
@@ -1758,7 +1769,7 @@
                       <div class="checkbox" style="margin-top: 4px; margin-left: 4px">
                         <label class="checkbox-clickable">
                           <input type="checkbox" class="checkbox-clickable" id="high-quality-instructions-check" />
-                          <span style="font-size: 13px">High quality pdf</span>
+                          <span style="font-size: 13px">High quality PDF</span>
                         </label>
                       </div>
                       <small>
@@ -1773,7 +1784,7 @@
                           <p>
                             Depending on your hardware and the resolution you've chosen, the pdf can take quite a few
                             seconds to generate. Be prepared to wait if you're generating instructions for larger
-                            resolutions, especially for high quality pdfs. Larger resolutions may also cause some
+                            resolutions, especially for high quality PDFs. Larger resolutions may also cause some
                             slowness on the page or may not work at all on less powerful devices, so I recommend
                             starting at the default and then going up.
                           </p>
