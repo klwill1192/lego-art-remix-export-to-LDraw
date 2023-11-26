@@ -534,7 +534,7 @@ let ALL_BRICKLINK_SOLID_COLORS = [
         name: "Medium Tan",
         hex: "#D9C594",
         id: 241,
-        ldid: -1,
+        ldid: 241,
     },
 ];
 
@@ -624,22 +624,33 @@ const KNOWN_BRICKLINK_STUD_COLOR_NAMES = [
 const KNOWN_BRICKLINK_TILE_COLOR_NAMES = [
     "Black",
     "Blue",
+    "Bright Green", // manually added from art project
     "Bright Light Blue",
     "Bright Light Orange",
+    "Bright Light Yellow", // manually added from art project
     "Bright Pink",
     "Coral",
+    "Dark Azure", // manually added from art project
     "Dark Blue",
     "Dark Bluish Gray",
     "Dark Brown",
+	"Dark Green",
     "Dark Orange",
+    "Dark Pink", // manually added from Warhol
     "Dark Red",
     "Dark Tan",
+    "Dark Turquoise", // manually added from dots
+	"Green",
     "Lavender",
+    "Light Aqua", // manually added from art project
     "Light Bluish Gray",
     "Light Nougat",
     "Lime",
+    "Magenta", // manually added from Warhol
+    "Medium Azure", // manually added from Warhol
     "Medium Blue",
     "Medium Nougat",
+    "Neon Yellow", // manually added from dots
     "Nougat",
     "Olive Green",
     "Orange",
@@ -649,6 +660,7 @@ const KNOWN_BRICKLINK_TILE_COLOR_NAMES = [
     "Tan",
     "White",
     "Yellow",
+    "Yellowish Green", // manually added from dots
     "Trans-Black",
     "Trans-Bright Green",
     "Trans-Clear",
@@ -668,17 +680,7 @@ const KNOWN_BRICKLINK_TILE_COLOR_NAMES = [
     "Glitter Trans-Clear",
     "Glitter Trans-Dark Pink",
     "Glitter Trans-Light Blue",
-    "Dark Bluish Gray", // manually added from Warhol
-    "Dark Pink", // manually added from Warhol
-    "Magenta", // manually added from Warhol
-    "Medium Azure", // manually added from Warhol
-    "Neon Yellow", // manually added from dots
-    "Dark Azure", // manually added from art project
-    "Light Aqua", // manually added from art project
-    "Bright Light Yellow", // manually added from art project
-    "Bright Green", // manually added from art project
-    "Dark Turquoise", // manually added from dots
-    "Yellowish Green", // manually added from dots
+//    "Dark Bluish Gray", // manually added from Warhol [Duplicate]
 ];
 
 const BRICKLINK_STUD_COLORS = ALL_BRICKLINK_SOLID_COLORS.filter((color) =>
